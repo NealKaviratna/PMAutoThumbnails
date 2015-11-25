@@ -53,9 +53,6 @@ def get_authenticated_service():
     storage = Storage("%s-oauth2.json" % sys.argv[0])
     credentials = storage.get()
 
-    if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage, args)
-
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
         http=credentials.authorize(httplib2.Http()))
 
@@ -86,10 +83,90 @@ def get_video_titles(youtube, channel_id):
         print "Next Page " + str(i)
 
     titles = []
+    i = 0
     for videoId in videoIds:
+        i += 1
+        print "Video " + str(i)
         titles.append([ youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title'] , videoId])
-        print youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title']
+        #print youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title']
         
     return titles
 
-youtube = get_authenticated_service()
+# Recorded Set class, represents a full youtube video and its data
+# TODO: make parsing exceptions for Chillin bodies everyone @ S@X
+class RecordedSet:
+    def __init__(self, title_data):
+        self.title = title_data[0]
+        self.videoID = title_data[1]
+
+        print self.title[2]
+        print self.title[2] is ':'
+        # TODO: why isn't this check working?
+        self.isImportantSet = self.title[2] is ':'
+        self.Importance = "None"
+        if self.isImportantSet:
+            print "importance check working"
+            if self.title[:2] is 'GF':
+                self.Importance = "Grand Finals"
+            elif self.title[:2] is 'LF':
+                self.Importance = "Loser's Finals"
+            elif self.title[:2] is 'LS':
+                self.Importance = "Loser's Semis"
+            elif self.title[:2] is 'WF':
+                self.Importance = "Winner's Finals"
+            elif self.title[:2] is 'WS':
+                self.Importance = "Winner's Semis"
+            else:
+                self.Importance = "None"
+            self.title = self.title[4:]
+            
+        self.eventName = self.title.partition(' - ')[0]
+        self.date = None
+
+        if self.eventName[:-3] is '/':
+            self.date = self.eventName[7:]
+            self.eventName = 'Xanadu'
+        else:
+            #TODO hard code dates for other events
+            pass
+
+        playerData = self.title.partition(' - ')[2]
+        player1Data = playerData.partition(' vs. ')[0]
+        player2Data = playerData.partition(' vs. ')[2]
+
+        self.p1 = player1Data.partition(' (')[0]
+        p1CharData = player1Data.partition(' (')[2][:-1]
+        self.p1Chars = p1CharData.split('/')
+        self.p2 = player2Data.partition(' (')[0]
+        p2CharData = player2Data.partition(' (')[2][:-1]
+        self.p2Chars = p2CharData.split('/')
+
+    def generate_thumbnail(self):
+        pass
+
+    def upload_thumbnail(self):
+        pass
+
+    def __str__(self):
+        if self.date is not None:
+            return self.p1 + " using " + self.p1Chars[0] + " vs " + self.p2 + " using " + self.p2Chars[0] + " at " + self.eventName + "on" + self.date
+        else:
+            return self.p1 + " using " + self.p1Chars[0] + " vs " + self.p2 + " using " + self.p2Chars[0] + " at " + self.eventName
+        
+
+def main():
+    youtube = get_authenticated_service()
+    channel_id = "UClrSoHwVCJN_jtj7X1HXJaQ"
+    titles = get_video_titles(youtube, channel_id)
+    sets = []
+
+    print "Creating Sets"
+    for title in titles:
+        sets.append(RecordedSet(title))
+
+    for s in sets:
+        s.generate_thumbnail()
+        s.upload_thumbnail()
+        print s
+
+
