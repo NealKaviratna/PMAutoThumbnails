@@ -3,12 +3,15 @@
 import httplib2
 import os
 import sys
+import time
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
+
+from PIL import Image, ImageDraw
 
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -80,13 +83,14 @@ def get_video_titles(youtube, channel_id):
         except KeyError:
             nextPage = None
         i += 1
+        nextPage = None
         print "Next Page " + str(i)
 
     titles = []
     i = 0
     for videoId in videoIds:
         i += 1
-        print "Video " + str(i)
+        print "Video " + str(i) #+ youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title']
         titles.append([ youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title'] , videoId])
         #print youtube.videos().list(id=videoId, part="snippet").execute()['items'][0]['snippet']['title']
         
@@ -98,32 +102,32 @@ class RecordedSet:
     def __init__(self, title_data):
         self.title = title_data[0]
         self.videoID = title_data[1]
+        self.image = None
 
-        print self.title[2]
-        print self.title[2] is ':'
         # TODO: why isn't this check working?
-        self.isImportantSet = self.title[2] is ':'
-        self.Importance = "None"
-        if self.isImportantSet:
-            print "importance check working"
-            if self.title[:2] is 'GF':
-                self.Importance = "Grand Finals"
-            elif self.title[:2] is 'LF':
-                self.Importance = "Loser's Finals"
-            elif self.title[:2] is 'LS':
-                self.Importance = "Loser's Semis"
-            elif self.title[:2] is 'WF':
-                self.Importance = "Winner's Finals"
-            elif self.title[:2] is 'WS':
-                self.Importance = "Winner's Semis"
-            else:
-                self.Importance = "None"
-            self.title = self.title[4:]
+        if len(self.title) > 2:
+            self.isImportantSet = self.title[2] is ':'
+            self.Importance = "None"
+            if self.isImportantSet:
+                print "importance check working"
+                if self.title[:2] is 'GF':
+                    self.Importance = "Grand Finals"
+                elif self.title[:2] is 'LF':
+                    self.Importance = "Loser's Finals"
+                elif self.title[:2] is 'LS':
+                    self.Importance = "Loser's Semis"
+                elif self.title[:2] is 'WF':
+                    self.Importance = "Winner's Finals"
+                elif self.title[:2] is 'WS':
+                    self.Importance = "Winner's Semis"
+                else:
+                    self.Importance = "None"
+                self.title = self.title[4:]
             
         self.eventName = self.title.partition(' - ')[0]
         self.date = None
 
-        if self.eventName[:-3] is '/':
+        if len(self.eventName) > 3 and self.eventName[:-3] is '/':
             self.date = self.eventName[7:]
             self.eventName = 'Xanadu'
         else:
@@ -142,7 +146,30 @@ class RecordedSet:
         self.p2Chars = p2CharData.split('/')
 
     def generate_thumbnail(self):
-        pass
+        base = Image.open("source/base.png")
+        char1Path = "source/" + self.p1Chars[-1] + "Render.png"
+        char2Path = "source/" + self.p2Chars[-1] + "Render.png"
+        char1 = Image.open(char1Path)
+        char2 = Image.open(char2Path)
+
+        base.paste(char1, (10, 130))
+        base.paste(char2, (800, 130))
+
+        draw = ImageDraw.Draw(base)
+        if self.isImportantSet:
+            draw.text((640 - draw.textsize(self.Importance), 400), self.Importance, fill=255)
+        draw.text((320 - draw.textsize(self.p1)[0], 60), self.p1, fill=255)
+        draw.text((960 - draw.textsize(self.p2)[0], 60), self.p2, fill=255)
+
+        draw.text((640 - draw.textsize(self.eventName)[0], 660), self.eventName, fill=255)
+        if self.date is not None:
+            draw.text((1000 - draw.textsize(self.date)[0], 660), self.date, fill=255)
+
+        base.save("output/temp"+self.videoID+".jpg")
+        self.image = base
+        
+        
+            
 
     def upload_thumbnail(self):
         pass
@@ -167,6 +194,7 @@ def main():
     for s in sets:
         s.generate_thumbnail()
         s.upload_thumbnail()
+        time.sleep(30)
         print s
 
 
