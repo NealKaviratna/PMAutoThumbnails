@@ -106,19 +106,20 @@ class RecordedSet:
 
         # TODO: why isn't this check working?
         if len(self.title) > 2:
-            self.isImportantSet = self.title[2] is ':'
+            self.isImportantSet = self.title[2] == ':'
+            print self.title[2], ':', self.title[2] == ':', "ord: " + str(ord(self.title[2])), "ord char: " + str(ord(':'))
             self.Importance = "None"
             if self.isImportantSet:
-                print "importance check working"
-                if self.title[:2] is 'GF':
+                #print self.title[:2], 'GF', self.title[:2] is 'GF'
+                if self.title[:2] == 'GF':
                     self.Importance = "Grand Finals"
-                elif self.title[:2] is 'LF':
+                elif self.title[:2] == 'LF':
                     self.Importance = "Loser's Finals"
-                elif self.title[:2] is 'LS':
+                elif self.title[:2] == 'LS':
                     self.Importance = "Loser's Semis"
-                elif self.title[:2] is 'WF':
+                elif self.title[:2] == 'WF':
                     self.Importance = "Winner's Finals"
-                elif self.title[:2] is 'WS':
+                elif self.title[:2] == 'WS':
                     self.Importance = "Winner's Semis"
                 else:
                     self.Importance = "None"
@@ -127,7 +128,7 @@ class RecordedSet:
         self.eventName = self.title.partition(' - ')[0]
         self.date = None
 
-        if len(self.eventName) > 3 and self.eventName[:-3] is '/':
+        if len(self.eventName) > 3 and self.eventName[:-3] == '/':
             self.date = self.eventName[7:]
             self.eventName = 'Xanadu'
         else:
@@ -192,7 +193,7 @@ def main():
         sets.append(RecordedSet(title))
 
     for s in sets:
-        s.generate_thumbnail()
+        #s.generate_thumbnail()
         s.upload_thumbnail()
         time.sleep(30)
         print s
