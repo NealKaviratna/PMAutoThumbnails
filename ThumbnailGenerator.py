@@ -4,6 +4,7 @@ import httplib2
 import os
 import sys
 import time
+import _imaging
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -11,7 +12,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -103,24 +104,25 @@ class RecordedSet:
         self.title = title_data[0]
         self.videoID = title_data[1]
         self.image = None
+        self.willUpload = True
 
-        # TODO: why isn't this check working?
+        if self.title[:7] == "Chillin":
+            self.willUpload = False
+
         if len(self.title) > 2:
             self.isImportantSet = self.title[2] == ':'
-            print self.title[2], ':', self.title[2] == ':', "ord: " + str(ord(self.title[2])), "ord char: " + str(ord(':'))
             self.Importance = "None"
             if self.isImportantSet:
-                #print self.title[:2], 'GF', self.title[:2] is 'GF'
                 if self.title[:2] == 'GF':
-                    self.Importance = "Grand Finals"
+                    self.Importance = "Grand\nFinals"
                 elif self.title[:2] == 'LF':
-                    self.Importance = "Loser's Finals"
+                    self.Importance = "Loser's\nFinals"
                 elif self.title[:2] == 'LS':
-                    self.Importance = "Loser's Semis"
+                    self.Importance = "Loser's\nSemis"
                 elif self.title[:2] == 'WF':
-                    self.Importance = "Winner's Finals"
+                    self.Importance = "Winner's\nFinals"
                 elif self.title[:2] == 'WS':
-                    self.Importance = "Winner's Semis"
+                    self.Importance = "Winner's\nSemis"
                 else:
                     self.Importance = "None"
                 self.title = self.title[4:]
@@ -128,7 +130,7 @@ class RecordedSet:
         self.eventName = self.title.partition(' - ')[0]
         self.date = None
 
-        if len(self.eventName) > 3 and self.eventName[:-3] == '/':
+        if len(self.eventName) > 3 and self.eventName[-3] == '/':
             self.date = self.eventName[7:]
             self.eventName = 'Xanadu'
         else:
@@ -157,14 +159,15 @@ class RecordedSet:
         base.paste(char2, (800, 130))
 
         draw = ImageDraw.Draw(base)
+        font = ImageFont.truetype("arial.ttf", 48)
         if self.isImportantSet:
-            draw.text((640 - draw.textsize(self.Importance), 400), self.Importance, fill=255)
-        draw.text((320 - draw.textsize(self.p1)[0], 60), self.p1, fill=255)
-        draw.text((960 - draw.textsize(self.p2)[0], 60), self.p2, fill=255)
+            draw.text((640 - draw.textsize(self.Importance, font=font)[0]/2, 400), self.Importance, fill=255, font=font)
+        draw.text((320 - draw.textsize(self.p1, font=font)[0]/2, 60), self.p1, fill=255, font=font)
+        draw.text((960 - draw.textsize(self.p2, font=font)[0]/2, 60), self.p2, fill=255, font=font)
 
-        draw.text((640 - draw.textsize(self.eventName)[0], 660), self.eventName, fill=255)
+        draw.text((640 - draw.textsize(self.eventName, font=font)[0]/2, 660), self.eventName, fill=255, font=font)
         if self.date is not None:
-            draw.text((1000 - draw.textsize(self.date)[0], 660), self.date, fill=255)
+            draw.text((1000 - draw.textsize(self.date, font=font)[0]/2, 660), self.date, fill=255, font=font)
 
         base.save("output/temp"+self.videoID+".jpg")
         self.image = base
@@ -193,9 +196,9 @@ def main():
         sets.append(RecordedSet(title))
 
     for s in sets:
-        #s.generate_thumbnail()
-        s.upload_thumbnail()
-        time.sleep(30)
-        print s
+        if s.willUpload:
+            s.generate_thumbnail()
+            s.upload_thumbnail()
+            print s
 
 
