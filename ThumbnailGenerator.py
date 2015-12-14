@@ -159,15 +159,16 @@ class RecordedSet:
         base.paste(char2, (800, 130))
 
         draw = ImageDraw.Draw(base)
-        font = ImageFont.truetype("arial.ttf", 48)
+        sanfont = ImageFont.truetype("ufonts.com_genuine.ttf", 48)
+        seriffont = ImageFont.truetype("edosz.ttf", 48)
         if self.isImportantSet:
-            draw.text((640 - draw.textsize(self.Importance, font=font)[0]/2, 400), self.Importance, fill=255, font=font)
-        draw.text((320 - draw.textsize(self.p1, font=font)[0]/2, 60), self.p1, fill=255, font=font)
-        draw.text((960 - draw.textsize(self.p2, font=font)[0]/2, 60), self.p2, fill=255, font=font)
+            draw.text((640 - draw.textsize(self.Importance, font=sanfont)[0]/2, 400), self.Importance, fill=255, font=sanfont)
+        draw.text((320 - draw.textsize(self.p1, font=sanfont)[0]/2, 60), self.p1, fill=255, font=sanfont)
+        draw.text((960 - draw.textsize(self.p2, font=sanfont)[0]/2, 60), self.p2, fill=255, font=sanfont)
 
-        draw.text((640 - draw.textsize(self.eventName, font=font)[0]/2, 660), self.eventName, fill=255, font=font)
+        draw.text((640 - draw.textsize(self.eventName, font=seriffont)[0]/2, 660), self.eventName, fill=255, font=seriffont)
         if self.date is not None:
-            draw.text((1000 - draw.textsize(self.date, font=font)[0]/2, 660), self.date, fill=255, font=font)
+            draw.text((1000 - draw.textsize(self.date, font=sanfont)[0]/2, 660), self.date, fill=255, font=sanfont)
 
         base.save("output/temp"+self.videoID+".jpg")
         self.image = base
