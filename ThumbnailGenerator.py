@@ -155,12 +155,12 @@ class RecordedSet:
         char1 = Image.open(char1Path)
         char2 = Image.open(char2Path)
 
-        base.paste(char1, (10, 130))
-        base.paste(char2, (800, 130))
+        base.paste(char1, (0, 125))
+        base.paste(char2, (768, 125))
 
         draw = ImageDraw.Draw(base)
         sanfont = ImageFont.truetype("ufonts.com_genuine.ttf", 48)
-        seriffont = ImageFont.truetype("edosz.ttf", 48)
+        seriffont = ImageFont.truetype("edosz.ttf", 72)
         if self.isImportantSet:
             draw.text((640 - draw.textsize(self.Importance, font=sanfont)[0]/2, 400), self.Importance, fill=255, font=sanfont)
         draw.text((320 - draw.textsize(self.p1, font=sanfont)[0]/2, 60), self.p1, fill=255, font=sanfont)
