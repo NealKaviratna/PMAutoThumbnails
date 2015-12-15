@@ -163,12 +163,12 @@ class RecordedSet:
         seriffont = ImageFont.truetype("edosz.ttf", 72)
         if self.isImportantSet:
             draw.text((640 - draw.textsize(self.Importance, font=sanfont)[0]/2, 400), self.Importance, fill=255, font=sanfont)
-        draw.text((320 - draw.textsize(self.p1, font=sanfont)[0]/2, 60), self.p1, fill=255, font=sanfont)
-        draw.text((960 - draw.textsize(self.p2, font=sanfont)[0]/2, 60), self.p2, fill=255, font=sanfont)
+        draw.text((256 - draw.textsize(self.p1, font=sanfont)[0]/2, 60), self.p1, fill=255, font=sanfont)
+        draw.text((1024 - draw.textsize(self.p2, font=sanfont)[0]/2, 60), self.p2, fill=255, font=sanfont)
 
-        draw.text((640 - draw.textsize(self.eventName, font=seriffont)[0]/2, 660), self.eventName, fill=255, font=seriffont)
+        draw.text((640 - draw.textsize(self.eventName, font=seriffont)[0]/2, 674 - draw.textsize(self.eventName, font=seriffont)[1]/2), self.eventName, fill=255, font=seriffont)
         if self.date is not None:
-            draw.text((1000 - draw.textsize(self.date, font=sanfont)[0]/2, 660), self.date, fill=255, font=sanfont)
+            draw.text((1000 - draw.textsize(self.date, font=sanfont)[0]/2, 674 - draw.textsize(self.eventName, font=sanfont)[1]/2), self.date, fill=255, font=sanfont)
 
         base.save("output/temp"+self.videoID+".jpg")
         self.image = base
